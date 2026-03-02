@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>随机文字 · 随机背景音乐</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: linear-gradient(145deg, #e8f0f9 0%, #d9e6f2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Georgia', 'Times New Roman', '宋体', serif;
+            padding: 16px;
+        }
+        .card {
+            max-width: 700px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            border-radius: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.1);
+            padding: 32px 28px;
+            border: 1px solid rgba(255,255,240,0.6);
+        }
+        .title {
+            text-align: center;
+            font-size: 1.6rem;
+            letter-spacing: 2px;
+            color: #2c3e50;
+            margin-bottom: 16px;
+            font-weight: 400;
+            border-bottom: 2px solid #b0c4de;
+            padding-bottom: 16px;
+        }
+        .content {
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 32px 28px;
+            box-shadow: inset 0 1px 8px rgba(0,0,0,0.02), 0 8px 18px rgba(0, 30, 60, 0.1);
+            border: 1px solid #d4e1ef;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            line-height: 1.8;
+            color: #1e2b38;
+            white-space: pre-wrap;
+            word-break: break-word;
+            text-align: left;
+            margin-bottom: 32px;
+            font-style: italic;
+        }
+        .music-box {
+            background: #e3ecf5;
+            border-radius: 60px;
+            padding: 16px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .music-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+        .music-label span {
+            font-size: 1.4rem;
+        }
+        audio {
+            flex: 1 1 200px;
+            min-width: 180px;
+            height: 40px;
+            border-radius: 30px;
+        }
+        .footer-note {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 0.85rem;
+            color: #6b7f8f;
+            border-top: 1px dashed #b0c4de;
+            padding-top: 18px;
+        }
+        .footer-note a {
+            color: #3d5a73;
+            text-decoration: none;
+            border-bottom: 1px dotted;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="title">🎲 扫码随机 · 文字 & 音乐</div>
+
+        <!-- 随机文字展示区域 -->
+        <div class="content" id="textDisplay">
+            正在为你挑选一段文字...
+        </div>
+
+        <!-- 背景音乐播放器（随机单曲，循环） -->
+        <div class="music-box">
+            <div class="music-label">
+                <span>🎵</span> 随机背景音乐
+            </div>
+            <audio id="bgMusic" controls loop>
+                您的浏览器不支持 audio 标签。
+            </audio>
+        </div>
+
+        <div class="footer-note">
+            ✨ 每次扫码，文字和背景音乐都会重新随机<br>
+            点击播放按钮收听当前随机到的音乐
+        </div>
+    </div>
+
+    <script>
+        // ---------- 核心配置：文字库 ----------
+        const textLibrary = [
+            "朕赐你丹书铁券\n允你见君不拜！",
+            "我比流言蜚语更早认识他。",
+            "八王爷当庭行刺！",
+            "想花就花\n想买就买。",
+            "永远不要丢掉想象力。",
+            "做一个不无聊的大人！",
+            "正是因为有彼此\n我们才是独一无二的双高胎。",
+            "萨克斯地道王冠老北京Mike~",
+            "我们是双高胎！",
+            "包饺砸——",
+            "我只会心疼giegie～",
+            "我们赢了可以一起笑\n我们输了也可以打一辆车回家。",
+            "双胞胎的喜剧在我们这可以升番到一百岁！",
+            "高超\n我一定会带你赢的！",
+            "俺叫Mike\n俺回来咧～",
+            "我们是永远不会分开的喜剧小队。",
+            "我们的关系血浓于水呀哥哥 ",
+            "高越是我人生的一部分",
+            "兄弟齐心\nm其利断金",
+            "他对我来说就是我自己",
+            "求你别死",
+            "你怎么不带自己亲弟弟呀~",
+            "越→大↘师↗",
+            "救救我救救我救救我",
+            "一般",
+            "我们好像被扫出来的雷啊！",
+            "好了！！！",
+            "别——打——我——哥——",
+            "我们是排名第一千三百四十六的绝命双子星！",
+            "别——打——我——弟——了——",
+            "你别教他了！",
+            "好吃好吃爽爽爽",
+            "破皮啦！\n高超ao！",
+            "我是帅气猛男小高超",
+            "全军复诵！\n高家屯",
+            "这趴是为啥啊？！",
+            "现在开始你也是隐藏款啦~",
+            "哥哥杀我！",
+            "！～！",
+            "火箭少女101高越",
+            "好汉歌刘欢在此！",
+            "我不过生日吗？！",
+            "那我就是宇宙的真弟",
+            "你打游戏只是为了赢吗？\n不然呢",
+            "他就算是个傻\n他也是我弟弟",
+            "512个T挺能装啊！",
+            "0.3%和78%的概率在我心里一样重要",
+            "要不咱俩是双胞胎呢",
+            "朕说过会护你周全\n又怎会置你性命于不顾呢。",
+            "正能量老铁双击666",
+            "别整别整",
+            "m后反劲儿啊",
+            "愿我们都成为不无聊的大人！",
+            "你是最棒的机器人!",
+            "我说是吊坠就是吊坠！",
+            "我们的生日愿望是：\n你们天天开心！",
+            "希望我们永远简单纯粹！",
+            "抽出我的概率是百分之0.3～",
+            "我叫高超\n发过高烧",
+            "I'm Mack\nI'm back!",
+            "而真正厉害的是高超的头脑",
+            "给大家听个响",
+            "我弟弟真人秀呢！",
+            "若你千金散尽\n我便是你最后的筹码",
+            "若你手无寸铁\n我便是你最后的武器"
+        ];
+
+        // ---------- 核心配置：音乐库（可放多个音乐）----------
+        const musicLibrary = [
+            '别怕变老双高.mp3',      // 替换成你的第一首背景音乐文件名
+            '多想在平庸的世界拥有你录唱.mp3',      // 替换成你的第二首背景音乐文件名
+            '开心快乐ok.mp3',      // 替换成你的第三首背景音乐文件名
+            '老男孩双高.mp3',      // 替换成你的第四首背景音乐文件名
+            '晚安大小姐.mp3',      // 替换成你的第五首背景音乐文件名
+            '我记得双高.mp3',      // 替换成你的第六首背景音乐文件名
+            '谢谢你们一直陪着.mp3',      // 替换成你的第七首背景音乐文件名
+            '白羊双高.mp3',      // 替换成你的第八首背景音乐文件名
+            '成都双高.mp3',      // 替换成你的第九首背景音乐文件名
+            '哥俩晚安.mp3',      // 替换成你的第十首背景音乐文件名
+            '可不可以高越.mp3',      // 替换成你的第十一首背景音乐文件名
+            '男孩双高.mp3',      // 替换成你的第十二首背景音乐文件名
+            '晚安早点睡觉高超.mp3',      // 替换成你的第十三首背景音乐文件名
+            '无名之辈高越.mp3',      // 替换成你的第十四首背景音乐文件名
+            '一次就好双高.mp3',      // 替换成你的第十五首背景音乐文件名
+            '拜拜晚安双高.mp3',      // 替换成你的第十六首背景音乐文件名
+            '董小姐双高.mp3',      // 替换成你的第十七首背景音乐文件名
+            '鸽子双高.mp3',      // 替换成你的第十八首背景音乐文件名
+            '可乐双高.mp3',      // 替换成你的第十九首背景音乐文件名
+            '南山南双高.mp3',      // 替换成你的第二十首背景音乐文件名
+            '往后余生高越.mp3',      // 替换成你的第二十一首背景音乐文件名
+            '相思赋予谁高越.mp3',      // 替换成你的第二十二首背景音乐文件名
+            '云烟成雨双高.mp3',      // 替换成你的第二十三首背景音乐文件名
+            '别怕变老高越.mp3',      // 替换成你的第二十四首背景音乐文件名
+            '多想在平庸的世界拥有你高越.mp3'       // 替换成你的第二十五首背景音乐文件名
+            '孤独患者高超.mp3',      // 替换成你的第二十六首背景音乐文件名
+            '老男孩高越.mp3',      // 替换成你的第二十七首背景音乐文件名
+            '情非得已高越.mp3',      // 替换成你的第二十八首背景音乐文件名
+            '往后余生高越直播.mp3',      // 替换成你的第二十九首背景音乐文件名
+            '消愁高越.mp3',      // 替换成你的第三十首背景音乐文件名
+            '纸短情长录唱.mp3',      // 替换成你的第三十一首背景音乐文件名
+        ];
+
+        // ---------- 随机选择文字 ----------
+        function displayRandomText() {
+            if (textLibrary.length === 0) {
+                document.getElementById('textDisplay').innerText = '📭 文字库为空，请添加内容';
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * textLibrary.length);
+            const selectedText = textLibrary[randomIndex];
+            document.getElementById('textDisplay').innerText = selectedText;
+            console.log('本次随机文字：', selectedText);
+        }
+
+        // ---------- 随机选择音乐并设置到播放器 ----------
+        function setRandomMusic() {
+            if (musicLibrary.length === 0) {
+                // 没有音乐时隐藏播放器或显示提示
+                document.querySelector('.music-box').innerHTML = '<p style="color: #999;">📭 音乐库为空，请添加音乐文件</p >';
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * musicLibrary.length);
+            const selectedMusic = musicLibrary[randomIndex];
+            const audio = document.getElementById('bgMusic');
+            
+            // 设置音频源（浏览器会自动预加载）
+            audio.src = selectedMusic;
+            
+            // 由于 src 改变，浏览器会重置播放状态，不会自动播放
+            // 我们保留 controls，用户可手动点击播放
+            
+            console.log('本次随机音乐：', selectedMusic);
+        }
+
+        // ---------- 页面加载时执行随机 ----------
+        window.addEventListener('load', () => {
+            displayRandomText();
+            setRandomMusic();
+        });
+
+        // ---------- 可选：轻触页面任意处尝试播放音乐（辅助体验，非必须）----------
+        (function enableQuickPlay() {
+            const music = document.getElementById('bgMusic');
+            const handler = function firstInteraction() {
+                // 如果音乐已经设置了 src 且处于暂停状态，尝试播放
+                if (music.src && music.paused) {
+                    music.play().catch(e => {
+                        // 自动播放失败是正常的，用户会手动点击播放按钮
+                        console.log('自动播放失败，用户可手动点击播放', e);
+                    });
+                }
+                document.body.removeEventListener('touchstart', handler);
+                document.body.removeEventListener('click', handler);
+            };
+            document.body.addEventListener('touchstart', handler);
+            document.body.addEventListener('click', handler);
+        })();
+    </script>
+</body>
+</html>
